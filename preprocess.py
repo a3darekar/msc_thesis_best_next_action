@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 def add_deal_outcome_to_df(group):
     entry = group.tail(1)
     entry.activity_added_date = entry.closed_date
-    entry.activity_type = entry.deal_status_string
+    entry.activity_type = entry.case_outcome_string
     entry.activity_seq += 1
     entry.activity_active_days = 0
     entry.activity_count += 1
@@ -27,7 +27,7 @@ def decode_activity_types(array):
 
 def prepare_sequences(df):
     activity_types = dict(enumerate(df.activity_type.unique()))
-    sequences = df[['activity_type_list', 'deal_status']]
+    sequences = df[['activity_type_list', 'case_outcome']]
     sequences['activity_type_list'] = sequences.activity_type_list.astype(str)
 
     days = df['activity_active_days_list']
@@ -54,12 +54,12 @@ def pad_set(days, acts, num_activity_types, max_seq_length):
 
 def build_seq_freq(df):
     seq_df = df.groupby('case_id').agg(list)
-    seq_df['single_deal_status'] = seq_df.deal_status.apply(lambda x: x[-1])
+    seq_df['single_case_outcome'] = seq_df.case_outcome.apply(lambda x: x[-1])
     seq_df['activity_type_str'] = seq_df.activity_type.apply(lambda x: x[:-1]).astype(str)
-    return seq_df.groupby(['activity_type_str'])['single_deal_status'].value_counts(normalize=True).round(decimals=2)
+    return seq_df.groupby(['activity_type_str'])['single_case_outcome'].value_counts(normalize=True).round(decimals=2)
 
 def append_outcome_to_seq(df):
-    df['deal_status_string'] = df.deal_status.apply(lambda x: utils.deal_status_types[x])
+    df['case_outcome_string'] = df.case_outcome.apply(lambda x: utils.case_outcome_types[x])
     # Add deal outcome
     print("Adding outcome to sequence...")
     df = df.groupby('case_id').apply(lambda x: add_deal_outcome_to_df(x)).reset_index(drop=True)
@@ -108,9 +108,9 @@ def build_active_days_colummn():
     
     success_case_ids = df.query('activity_type == "O_Accepted"')['case_id'].unique()
 
-    df['deal_status'] = 0
+    df['case_outcome'] = 0
 
-    df.loc[df['case_id'].isin(success_case_ids), 'deal_status'] = 1
+    df.loc[df['case_id'].isin(success_case_ids), 'case_outcome'] = 1
 
     df['le_activity_type'] = df.activity_type
     df['activity_count'] = df.groupby('case_id')['case_id'].transform('count')

@@ -10,7 +10,7 @@ def main(input_path='BPI Challenge 2017.xes'):
     
     encode_activity_types = utils.get_encode_activity_types(df)
 
-    df['deal_status_string'] = df.deal_status.apply(lambda x: utils.deal_status_types[x])
+    df['case_outcome_string'] = df.case_outcome.apply(lambda x: utils.case_outcome_types[x])
 
     df = df.groupby('case_id').apply(lambda x: utils.add_outcome_to_df(x)).reset_index(drop=True)
     df['le_activity_type'] = df.activity_type.apply(lambda x: encode_activity_types[x])
@@ -51,7 +51,7 @@ def main(input_path='BPI Challenge 2017.xes'):
     activity_ids = {v: k for k, v in activity_types.items()}
 
     # Collect tail sequences
-    test_df = df.groupby('id_customerdeal').last()[['activity_type_list', 'deal_status', 'activity_count']]
+    test_df = df.groupby('case_id').last()[['activity_type_list', 'case_outcome', 'activity_count']]
     test_df['activity_type_list'] = test_df['activity_type_list'].apply(lambda x: x[:-1])
 
     # test_df.to_csv('test_bpi_df.csv')
@@ -68,7 +68,7 @@ def main(input_path='BPI Challenge 2017.xes'):
             improvements.append(abs(predicted_score - kpi_probability_table.get(tuple(old_seq), 0)))
             new_sequences.append(recommended_sequence)
             new_preds.append(kpi_probability_table.get(tuple(recommended_sequence), 0))
-            true_outcomes.append(row['deal_status'])
+            true_outcomes.append(row['case_outcome'])
 
         new_preds = np.array(new_preds)
         true_outcomes = np.array(true_outcomes)
@@ -97,7 +97,7 @@ def main(input_path='BPI Challenge 2017.xes'):
             improvements.append(abs(predicted_score - kpi_probability_table.get(tuple(old_seq), 0)))
             new_sequences.append(recommended_sequence)
             new_preds.append(kpi_probability_table.get(tuple(recommended_sequence), 0))
-            true_outcomes.append(row['deal_status'])
+            true_outcomes.append(row['case_outcome'])
 
         new_preds = np.array(new_preds)
         true_outcomes = np.array(true_outcomes)

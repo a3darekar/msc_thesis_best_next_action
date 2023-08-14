@@ -1,7 +1,7 @@
 from collections import defaultdict
 
-deal_status = {'lost': 0, 'won': 1}
-deal_status_types = {v: k for k, v in deal_status.items()}
+case_outcome = {'lost': 0, 'won': 1}
+case_outcome_types = {v: k for k, v in case_outcome.items()}
 
 def get_encode_activity_types(df):
     return {v: k for k, v in get_activity_types(df).items()}
@@ -12,7 +12,7 @@ def get_activity_types(df):
 def add_outcome_to_df(group):
     entry = group.tail(1)
     entry.timestamp = entry.timestamp
-    entry.activity_type = entry.deal_status_string
+    entry.activity_type = entry.case_outcome_string
     entry.activity_seq += 1
     entry.activity_active_days = 0
     entry.activity_count += 1
@@ -33,7 +33,7 @@ def get_class_report_top_n(n,probs):
 
 
 def prepare_kpi_lookup_table(df):
-    seq, outcomes = df['activity_type_list'], df['deal_status']
+    seq, outcomes = df['activity_type_list'], df['case_outcome']
 
     # Count the success ratio for each sequence in the dataset
     success_ratios = defaultdict(lambda: [0, 0])
